@@ -1,0 +1,33 @@
+version: '2.1'
+services:
+  database:
+    restart: always
+    image: postgres:10.1
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - '5433:5432'
+    expose:
+      - '5433'
+    container_name: profile_db
+  app:
+    container_name: profile_api
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_URI: postgres://postgres:postgres@database:5432/db
+    depends_on:
+      - database
+    entrypoint: ['/bin/bash', '-c', './start_api.sh']
+volumes:
+  pgdata:
+    name: db_data
